@@ -24,7 +24,7 @@ namespace ChatServer
                 BroadcastConnection();
             }
         }
-        static void BroadcastConnection()
+        static async Task BroadcastConnection()
         {
             foreach(var user in _users)
             {
@@ -34,23 +34,21 @@ namespace ChatServer
                     broadcastPacket.WriteOpCode(1);
                     broadcastPacket.WriteMessage(usr.Username);
                     broadcastPacket.WriteMessage(usr.UID.ToString());
-                    user.ClientSocket.Client.Send(broadcastPacket.GetPacketBytes());
-
-
+                    await user.ClientSocket.Client.SendAsync(broadcastPacket.GetPacketBytes());
                 }
             }
         }
-        public static void BroadcastMessage(string message)
+        public static async Task BroadcastMessage(string message)
         {
             foreach(var user in _users)
             {
                 var msgPacket = new PacketBuilder();
                 msgPacket.WriteOpCode(5);
                 msgPacket.WriteMessage(message);
-                user.ClientSocket.Client.Send(msgPacket.GetPacketBytes());
+                await user.ClientSocket.Client.SendAsync(msgPacket.GetPacketBytes());
             }
         }
-        public static void BroadcastDiconnect(string uid)
+        public static async Task BroadcastDiconnect(string uid)
         {
             var disconnectedUser = _users.Where(x => x.UID.ToString() == uid).FirstOrDefault();
             _users.Remove(disconnectedUser);
@@ -59,7 +57,7 @@ namespace ChatServer
                 var broadcastPacket = new PacketBuilder();
                 broadcastPacket.WriteOpCode(10);
                 broadcastPacket.WriteMessage(uid);
-                user.ClientSocket.Client.Send(broadcastPacket.GetPacketBytes());
+                await user.ClientSocket.Client.SendAsync(broadcastPacket.GetPacketBytes());
             }
 
             BroadcastMessage($"[{disconnectedUser.Username}] Disconnected!");
