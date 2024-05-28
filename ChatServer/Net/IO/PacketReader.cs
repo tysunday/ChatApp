@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
+﻿using NAudio.Wave;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ChatServer.Net.IO
 {
@@ -24,6 +20,21 @@ namespace ChatServer.Net.IO
             var msg = Encoding.ASCII.GetString(msgBuffer);
             return msg;
 
+        }
+        public byte[] ReadAudioMessage()
+        {
+            var length = ReadInt32();
+            var audioBuffer = new byte[length];
+            _ns.Read(audioBuffer, 0, length);
+            return audioBuffer;
+        }
+        public void SaveAudioMessage(byte[] audioData)
+        {
+            string filepath = Guid.NewGuid().ToString();
+            using (var waveFileWriter = new WaveFileWriter((filepath), new WaveFormat()))
+            {
+                waveFileWriter.Write(audioData, 0, audioData.Length);
+            }
         }
     }
 }

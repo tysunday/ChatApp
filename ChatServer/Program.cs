@@ -1,8 +1,6 @@
 ﻿using System.Net.Sockets;
-using System;
 using System.Net;
 using ChatServer.Net.IO;
-using System.ComponentModel.Design;
 
 namespace ChatServer
 {
@@ -11,7 +9,7 @@ namespace ChatServer
         static List<Client> _users;
         static TcpListener _listener;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             _users = new List<Client>();
             _listener  = new TcpListener(IPAddress.Parse("127.0.0.1"), 7891);
@@ -21,7 +19,7 @@ namespace ChatServer
                 var client = new Client(_listener.AcceptTcpClient());
                 _users.Add(client);
                 /*Broadcast the connection to everyone on the server*/
-                BroadcastConnection();
+               await BroadcastConnection();
             }
         }
         static async Task BroadcastConnection()
@@ -48,6 +46,17 @@ namespace ChatServer
                 await user.ClientSocket.Client.SendAsync(msgPacket.GetPacketBytes());
             }
         }
+
+        public static async Task BroadcastAudioMessage(byte[] audioBytes)
+        {
+            foreach(var user in _users)
+            {
+                var audioPacket = new PacketBuilder();
+                audioPacket.WriteOpCode(7);
+                audioPacket.WriteAudioMessage(audioBytes);
+                await user.ClientSocket.Client.SendAsync(audioPacket.GetPacketBytes());
+            }
+        }
         public static async Task BroadcastDiconnect(string uid)
         {
             var disconnectedUser = _users.Where(x => x.UID.ToString() == uid).FirstOrDefault();
@@ -60,7 +69,7 @@ namespace ChatServer
                 await user.ClientSocket.Client.SendAsync(broadcastPacket.GetPacketBytes());
             }
 
-            BroadcastMessage($"[{disconnectedUser.Username}] Disconnected!");
+            await BroadcastMessage($"[{disconnectedUser.Username}] Disconnected!");
         }
 
 

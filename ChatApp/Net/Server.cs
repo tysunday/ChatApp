@@ -1,10 +1,5 @@
 ﻿using ChatClient.Net.IO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChatClient.Net
 {
@@ -17,6 +12,7 @@ namespace ChatClient.Net
         public event Action connectedEvent;
         public event Action msgReceivedEvent;
         public event Action userDisconnectEvent;
+        public event Action audioMsgReceivedEvent;
 
         public Server()
         {
@@ -57,6 +53,10 @@ namespace ChatClient.Net
                             msgReceivedEvent?.Invoke();
                             break;
 
+                        case 7:
+                            audioMsgReceivedEvent?.Invoke();
+                            break;
+
                         case 10:
                             userDisconnectEvent?.Invoke();
                             break;
@@ -68,12 +68,19 @@ namespace ChatClient.Net
                 }
             });
         }
-        public void  SendMessageToServer(string message)
+        public async Task SendMessageToServer(string message)
         {
             var messagePacket = new PacketBuilder();
             messagePacket.WriteOpCode(5);
             messagePacket.WriteMessage(message);
-            _client.Client.Send(messagePacket.GetPacketBytes());
+            await _client.Client.SendAsync(messagePacket.GetPacketBytes());
+        }
+        public async Task SendAudioMessageToServer(byte[] audioBytes)
+        {
+            var audioPacket = new PacketBuilder();
+            audioPacket.WriteOpCode(7);
+            audioPacket.WriteAudioMessage(audioBytes);
+            await _client.Client.SendAsync(audioPacket.GetPacketBytes());
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Text;
-using System;
 
 namespace ChatClient.Net.IO
 {
@@ -20,6 +19,13 @@ namespace ChatClient.Net.IO
             var msgLength = msg.Length;
             _ms.Write(BitConverter.GetBytes(msgLength));
             _ms.Write(Encoding.ASCII.GetBytes(msg));
+        }
+
+        public void WriteAudioMessage(byte[] audioMsg)
+        {
+            var audioLength = audioMsg.Length;
+            _ms.Write(BitConverter.GetBytes(audioLength), 0, 4);
+            _ms.Write(audioMsg, 0, audioLength);
         }
 
         public byte[] GetPacketBytes()

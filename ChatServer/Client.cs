@@ -1,10 +1,5 @@
 ﻿using ChatServer.Net.IO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChatServer
 {
@@ -29,7 +24,7 @@ namespace ChatServer
             Task.Run(() => Process());
         }
 
-        void Process()
+        async Task Process()
         {
             while (true)
             {
@@ -41,7 +36,12 @@ namespace ChatServer
                         case 5:
                             var msg = _packetReader.ReadMessage();
                             Console.WriteLine($"[{DateTime.Now}]: Message received! {msg}");
-                            Program.BroadcastMessage($"[{DateTime.Now}]: [{Username}]: {msg}");
+                            await Program.BroadcastMessage($"[{DateTime.Now}]: [{Username}]: {msg}");
+                            break;
+                        case 7:
+                            var audioMsg = _packetReader.ReadAudioMessage();
+                            Console.WriteLine($"[{DateTime.Now}]: Audio message received!");
+                            await Program.BroadcastAudioMessage(audioMsg);
                             break;
                         default:
                             break;
@@ -50,7 +50,7 @@ namespace ChatServer
                 catch (Exception)
                 {
                     Console.WriteLine($"[{UID.ToString()}]: Disconnected!");
-                    Program.BroadcastDiconnect(UID.ToString());
+                    await Program.BroadcastDiconnect(UID.ToString());
                     ClientSocket.Close();
                     break;
                 }

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ChatApp"
         xmlns:viewmodel="clr-namespace:ChatClient.MVVM.ViewModel"
         mc:Ignorable="d"
-        Title="MainWindow" Height="474" Width="816">
+        Title="MainWindow" Height="474" Width="1028">
     <Window.DataContext>
         <viewmodel:MainViewModel/>
     </Window.DataContext>
@@ -33,18 +33,31 @@
         </DockPanel>
 
         <StackPanel Grid.Column="1">
-            <ListView Height="380"
-                      ItemsSource="{Binding Messages}"/>
+
             <StackPanel Orientation="Horizontal">
-                <TextBox Height="55"
-                         Width="545"
-                     VerticalAlignment="Center"
-                         Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Width="55"
-                        Content="Send"
-                        Command="{Binding SendMessageCommand}"/>
+                <ListView Height="380" ItemsSource="{Binding Messages}"/>
+
+                <StackPanel Orientation="Vertical">
+                    <TextBlock>Audio messages</TextBlock>
+                    <ListView Width="220" Height="380" BorderThickness="2" ItemsSource="{Binding AudioMessages}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Filename}"/>
+                                    <Button Content="Play" Command="{Binding DataContext.PlayAudioCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
             </StackPanel>
-            
+
+            <StackPanel Orientation="Horizontal">
+                <TextBox Height="55" Width="545" VerticalAlignment="Center" Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Width="55" Content="Send" Command="{Binding SendMessageCommand}"/>
+                <Button Width="55" Content="Record" Command="{Binding RecordAudioMessageCommand}"/>
+            </StackPanel>
+
         </StackPanel>
     </Grid>
 </Window>
