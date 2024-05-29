@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:ChatApp"
              StartupUri="MVVM/View/MainWindow.xaml">
     <Application.Resources>
-         
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Application.Resources>
 </Application>

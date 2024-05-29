@@ -9,6 +9,14 @@ using System.Windows;
 
 namespace ChatClient.MVVM.ViewModel
 {
+    public class MessageModel
+    {
+        public string Sender { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string TextMessage { get; set; } // Может быть null для аудиосообщений
+        public string AudioFilename { get; set; } // Может быть null для текстовых сообщений
+    }
+
     public class AudioMessageModel
     {
         public string Filename { get; set; }
@@ -19,10 +27,8 @@ namespace ChatClient.MVVM.ViewModel
     {
         private AudioClass AC;
 
+       public ObservableCollection<MessageModel> Messages { get; set; }
         public ObservableCollection<UserModel> Users { get; set; }
-        public ObservableCollection<string> Messages { get; set; }
-        public ObservableCollection<AudioMessageModel> AudioMessages { get; set; }
-
 
         public string Username { get; set; }
         public string Message { get; set; }
@@ -38,19 +44,26 @@ namespace ChatClient.MVVM.ViewModel
         public MainViewModel()
         {
             AC = new AudioClass();
-            AudioMessages = new ObservableCollection<AudioMessageModel>();
+            Messages = new ObservableCollection<MessageModel>();
             Users = new ObservableCollection<UserModel>();
-            Messages = new ObservableCollection<string>();
             _server = new Server();
             _server.connectedEvent += UserConnected;
             _server.msgReceivedEvent += MessageReceived;
             _server.userDisconnectEvent += RemoveUser;
-            _server.audioMsgReceivedEvent += audioMessageReceived;
+            _server.audioMsgReceivedEvent += AudioMessageReceived;
+            ;
 
             ConnectToServerCommand = new RelayCommand(o => _server.ConnectToServer(Username), o => !string.IsNullOrEmpty(Username));
-            SendMessageCommand = new RelayCommand(o => _server.SendMessageToServer(Message), o => !string.IsNullOrEmpty(Message));
+            SendMessageCommand = new RelayCommand(o => SendMessage(), o => !string.IsNullOrEmpty(Message));
             RecordAudioMessageCommand = new RelayCommand(o => RecordAudio());
-            PlayAudioCommand = new RelayCommand(o => PlayAudio((AudioMessageModel)o));
+            PlayAudioCommand = new RelayCommand(o => PlayAudio((MessageModel)o));
+        }
+
+        private void SendMessage()
+        {
+            _server.SendMessageToServer(Message);
+            //Messages.Add(new MessageModel { Sender = Username, Timestamp = DateTime.Now, TextMessage = Message });
+            //Message = string.Empty;
         }
 
         private async Task RecordAudio()
@@ -62,12 +75,18 @@ namespace ChatClient.MVVM.ViewModel
             else
             {
                 AC.StopRecord();
-                MessageBox.Show("Запись окончена.");
                 var filePath = AC.GetRecordedAudioFilePath();
                 if (File.Exists(filePath))
                 {
                     var audioBytes = AC.GetRecordedAudioBytes(filePath);
                     await _server.SendAudioMessageToServer(audioBytes);
+
+                    //Messages.Add(new MessageModel
+                    //{
+                    //    Sender = Username,
+                    //    Timestamp = DateTime.Now,
+                    //    AudioFilename = Path.GetFileName(filePath)
+                    //});
 
                     File.Delete(filePath);
                 }
@@ -82,9 +101,9 @@ namespace ChatClient.MVVM.ViewModel
             }
         }
 
-        private void PlayAudio(AudioMessageModel audioMessage)
+        private void PlayAudio(MessageModel audioMessage)
         {
-            var fileReader = new WaveFileReader("ReceivedAudio\\" + audioMessage.Filename);
+            var fileReader = new WaveFileReader("ReceivedAudio\\" + audioMessage.AudioFilename);
             var waveOut = new WaveOutEvent();
             waveOut.Init(fileReader);
             waveOut.Play();
@@ -100,22 +119,22 @@ namespace ChatClient.MVVM.ViewModel
         private void MessageReceived()
         {
             var msg = _server.PacketReader.ReadMessage();
-            Application.Current.Dispatcher.Invoke(() => Messages.Add(msg));
+            Application.Current.Dispatcher.Invoke(() => Messages.Add(new MessageModel { Sender = "Server", Timestamp = DateTime.Now, TextMessage = msg }));
         }
 
-        private void audioMessageReceived()
+        private void AudioMessageReceived()
         {
             var audioMsg = _server.PacketReader.ReadAudioMessage();
             string filePath = $"ReceivedAudio\\Audio{MyFunc.GetFormattedTime()}.wav";
-
             File.WriteAllBytes(filePath, audioMsg);
 
-            var audioMessage = new AudioMessageModel
+            var audioMessage = new MessageModel
             {
-                Filename = Path.GetFileName(filePath),
-                Duration = GetAudioDuration(filePath)
+                Sender = "Server",
+                Timestamp = DateTime.Now,
+                AudioFilename = Path.GetFileName(filePath)
             };
-            Application.Current.Dispatcher.Invoke(() => AudioMessages.Add(audioMessage));
+            Application.Current.Dispatcher.Invoke(() => Messages.Add(audioMessage));
         }
 
         private void UserConnected()

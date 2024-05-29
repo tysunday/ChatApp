@@ -36,7 +36,7 @@ namespace ChatServer
                         case 5:
                             var msg = _packetReader.ReadMessage();
                             Console.WriteLine($"[{DateTime.Now}]: Message received! {msg}");
-                            await Program.BroadcastMessage($"[{DateTime.Now}]: [{Username}]: {msg}");
+                            await Program.BroadcastMessage($"[{Username}]: {msg}");
                             break;
                         case 7:
                             var audioMsg = _packetReader.ReadAudioMessage();

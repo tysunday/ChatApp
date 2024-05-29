@@ -3,12 +3,15 @@ using System.Text;
 
 namespace ChatClient.Net.IO
 {
-    class PacketBuilder
+    public class PacketBuilder
     {
-        MemoryStream _ms;
+        private MemoryStream _ms;
+        private BinaryWriter _writer;
+
         public PacketBuilder()
         {
             _ms = new MemoryStream();
+            _writer = new BinaryWriter(_ms);
         }
         public void WriteOpCode(byte opcode)
         {

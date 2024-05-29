@@ -130,9 +130,12 @@ namespace ChatClient
         {
             try
             {
-
                 waveSource?.StopRecording();
+                waveSource?.Dispose();
+                waveSource = null;
 
+                waveFile?.Dispose();
+                waveFile = null;
             }
             catch (NAudio.MmException naudioex)
             {
