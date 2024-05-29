@@ -13,8 +13,6 @@
     <Window.Resources>
         <DataTemplate x:Key="MessageTemplate">
             <StackPanel>
-                <TextBlock Text="{Binding Sender}" FontWeight="Bold" />
-                <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm:ss}'}" FontStyle="Italic" />
                 <TextBlock Text="{Binding TextMessage}" Visibility="{Binding TextMessage, Converter={StaticResource NullToVisibilityConverter}}" />
                 <StackPanel Orientation="Horizontal" Visibility="{Binding AudioFilename, Converter={StaticResource NullToVisibilityConverter}}">
                     <TextBlock Text="{Binding AudioFilename}" />

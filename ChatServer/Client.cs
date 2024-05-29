@@ -41,6 +41,7 @@ namespace ChatServer
                         case 7:
                             var audioMsg = _packetReader.ReadAudioMessage();
                             Console.WriteLine($"[{DateTime.Now}]: Audio message received!");
+                            await Program.BroadcastMessage($"[{Username}]: send audio message.");
                             await Program.BroadcastAudioMessage(audioMsg);
                             break;
                         default:

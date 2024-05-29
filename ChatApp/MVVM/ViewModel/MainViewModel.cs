@@ -4,11 +4,14 @@ using ChatClient.Net;
 using ChatClient.Net.IO;
 using NAudio.Wave;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Windows;
 
 namespace ChatClient.MVVM.ViewModel
 {
+
     public class MessageModel
     {
         public string Sender { get; set; }
@@ -23,15 +26,24 @@ namespace ChatClient.MVVM.ViewModel
         public string Duration { get; set; }
     }
 
-    class MainViewModel
+    class MainViewModel : INotifyPropertyChanged
     {
         private AudioClass AC;
 
-       public ObservableCollection<MessageModel> Messages { get; set; }
+        public ObservableCollection<MessageModel> Messages { get; set; }
         public ObservableCollection<UserModel> Users { get; set; }
+        public string _message;
+        public string Message
+        {
+            get => _message;
+            set
+            {
+                _message = value;
+                OnPropertyChanged(nameof(Message));
+            }
+        }
 
         public string Username { get; set; }
-        public string Message { get; set; }
 
         private Server _server;
 
@@ -63,7 +75,7 @@ namespace ChatClient.MVVM.ViewModel
         {
             _server.SendMessageToServer(Message);
             //Messages.Add(new MessageModel { Sender = Username, Timestamp = DateTime.Now, TextMessage = Message });
-            //Message = string.Empty;
+            Message = string.Empty;
         }
 
         private async Task RecordAudio()
@@ -149,5 +161,12 @@ namespace ChatClient.MVVM.ViewModel
                 Application.Current.Dispatcher.Invoke(() => Users.Add(user));
             }
         }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
+
