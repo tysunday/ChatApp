@@ -49,7 +49,7 @@ namespace ChatServer
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"[{UID.ToString()}]: Disconnected!");
+                    Console.WriteLine($"[{UID}]: Disconnected!");
                     await Program.BroadcastDiconnect(UID.ToString());
                     ClientSocket.Close();
                     break;

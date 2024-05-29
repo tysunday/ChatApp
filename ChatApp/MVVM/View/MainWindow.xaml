@@ -33,13 +33,19 @@
         </DockPanel>
 
         <StackPanel Grid.Column="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+            </Grid>
 
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Grid.Column="0">
                 <ListView Height="380" ItemsSource="{Binding Messages}"/>
 
-                <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Vertical" Grid.Column="1">
                     <TextBlock>Audio messages</TextBlock>
-                    <ListView Width="220" Height="380" BorderThickness="2" ItemsSource="{Binding AudioMessages}">
+                    <ListView BorderThickness="0.5" ItemsSource="{Binding AudioMessages}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -55,7 +61,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBox Height="55" Width="545" VerticalAlignment="Center" Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Width="55" Content="Send" Command="{Binding SendMessageCommand}"/>
-                <Button Width="55" Content="Record" Command="{Binding RecordAudioMessageCommand}"/>
+                <Button Width="75" Content="Record/Stop" Command="{Binding RecordAudioMessageCommand}"/>
             </StackPanel>
 
         </StackPanel>

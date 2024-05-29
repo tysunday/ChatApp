@@ -31,7 +31,7 @@ namespace ChatServer.Net.IO
         public void SaveAudioMessage(byte[] audioData)
         {
             string filepath = Guid.NewGuid().ToString();
-            using (var waveFileWriter = new WaveFileWriter((filepath), new WaveFormat()))
+            using (var waveFileWriter = new WaveFileWriter(filepath, new WaveFormat()))
             {
                 waveFileWriter.Write(audioData, 0, audioData.Length);
             }

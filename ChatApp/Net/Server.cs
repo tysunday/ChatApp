@@ -34,6 +34,7 @@ namespace ChatClient.Net
                 }
                 ReadPackets();
             }
+
         }
 
         private void ReadPackets()

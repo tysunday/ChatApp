@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using NAudio.Wave;
+using Microsoft.VisualBasic.Devices;
 
 namespace ChatClient.Net.IO
 {
@@ -20,7 +21,6 @@ namespace ChatClient.Net.IO
             _ns.Read(msgBuffer, 0, length);
             var msg = Encoding.ASCII.GetString(msgBuffer);
             return msg;
-
         }
         public byte[] ReadAudioMessage()
         {
@@ -32,7 +32,7 @@ namespace ChatClient.Net.IO
         public void SaveAudioMessage(byte[] audioData)
         {
             string filepath = Guid.NewGuid().ToString();
-            using (var waveFileWriter = new WaveFileWriter((filepath), new WaveFormat()))
+            using (var waveFileWriter = new WaveFileWriter(filepath, new WaveFormat()))
             {
                 waveFileWriter.Write(audioData, 0, audioData.Length);
             }

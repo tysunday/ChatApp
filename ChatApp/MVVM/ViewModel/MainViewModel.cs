@@ -1,6 +1,7 @@
 ﻿using ChatClient.MVVM.Core;
 using ChatClient.MVVM.Model;
 using ChatClient.Net;
+using ChatClient.Net.IO;
 using NAudio.Wave;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -20,15 +21,18 @@ namespace ChatClient.MVVM.ViewModel
 
         public ObservableCollection<UserModel> Users { get; set; }
         public ObservableCollection<string> Messages { get; set; }
-        public RelayCommand ConnectToServerCommand { get; set; }
-        public RelayCommand SendMessageCommand { get; set; }
+        public ObservableCollection<AudioMessageModel> AudioMessages { get; set; }
+
+
         public string Username { get; set; }
         public string Message { get; set; }
+
         private Server _server;
 
+        public RelayCommand ConnectToServerCommand { get; set; }
+        public RelayCommand SendMessageCommand { get; set; }
         public RelayCommand RecordAudioMessageCommand { get; set; }
         public RelayCommand PlayAudioCommand { get; set; }
-        public ObservableCollection<AudioMessageModel> AudioMessages { get; set; }
 
 
         public MainViewModel()
@@ -65,12 +69,7 @@ namespace ChatClient.MVVM.ViewModel
                     var audioBytes = AC.GetRecordedAudioBytes(filePath);
                     await _server.SendAudioMessageToServer(audioBytes);
 
-                    var audioMessage = new AudioMessageModel
-                    {
-                        Filename = filePath,
-                        Duration = GetAudioDuration(filePath)
-                    };
-                    AudioMessages.Add(audioMessage);
+                    File.Delete(filePath);
                 }
             }
         }
@@ -85,7 +84,7 @@ namespace ChatClient.MVVM.ViewModel
 
         private void PlayAudio(AudioMessageModel audioMessage)
         {
-            var fileReader = new WaveFileReader(audioMessage.Filename);
+            var fileReader = new WaveFileReader("ReceivedAudio\\" + audioMessage.Filename);
             var waveOut = new WaveOutEvent();
             waveOut.Init(fileReader);
             waveOut.Play();
@@ -107,19 +106,17 @@ namespace ChatClient.MVVM.ViewModel
         private void audioMessageReceived()
         {
             var audioMsg = _server.PacketReader.ReadAudioMessage();
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ReceivedAudio", $"{Guid.NewGuid()}.wav");
+            string filePath = $"ReceivedAudio\\Audio{MyFunc.GetFormattedTime()}.wav";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             File.WriteAllBytes(filePath, audioMsg);
 
             var audioMessage = new AudioMessageModel
             {
-                Filename = filePath,
+                Filename = Path.GetFileName(filePath),
                 Duration = GetAudioDuration(filePath)
             };
             Application.Current.Dispatcher.Invoke(() => AudioMessages.Add(audioMessage));
         }
-
 
         private void UserConnected()
         {
