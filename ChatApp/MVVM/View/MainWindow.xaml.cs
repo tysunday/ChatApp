@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using ChatClient.MVVM.ViewModel;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +20,8 @@ namespace ChatApp
         public MainWindow()
         {
             InitializeComponent();
+            var viewModel = (MainViewModel)DataContext;
+            viewModel.SetMessagesListView(MessagesListView);
         }
     }
 }

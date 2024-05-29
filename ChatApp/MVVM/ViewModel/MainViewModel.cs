@@ -1,13 +1,12 @@
 ﻿using ChatClient.MVVM.Core;
 using ChatClient.MVVM.Model;
 using ChatClient.Net;
-using ChatClient.Net.IO;
 using NAudio.Wave;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace ChatClient.MVVM.ViewModel
 {
@@ -46,7 +45,7 @@ namespace ChatClient.MVVM.ViewModel
         public string Username { get; set; }
 
         private Server _server;
-
+        private ListView _messagesListView;
         public RelayCommand ConnectToServerCommand { get; set; }
         public RelayCommand SendMessageCommand { get; set; }
         public RelayCommand RecordAudioMessageCommand { get; set; }
@@ -59,6 +58,7 @@ namespace ChatClient.MVVM.ViewModel
             Messages = new ObservableCollection<MessageModel>();
             Users = new ObservableCollection<UserModel>();
             _server = new Server();
+            Messages.CollectionChanged += Messages_CollectionChanged; // Подписка на событие CollectionChanged
             _server.connectedEvent += UserConnected;
             _server.msgReceivedEvent += MessageReceived;
             _server.userDisconnectEvent += RemoveUser;
@@ -70,7 +70,24 @@ namespace ChatClient.MVVM.ViewModel
             RecordAudioMessageCommand = new RelayCommand(o => RecordAudio());
             PlayAudioCommand = new RelayCommand(o => PlayAudio((MessageModel)o));
         }
-
+        public void SetMessagesListView(ListView messagesListView)
+        {
+            _messagesListView = messagesListView;
+        }
+        private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            ScrollToBottom();
+        }
+        private void ScrollToBottom()
+        {
+            if (_messagesListView != null && _messagesListView.Items.Count > 0)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _messagesListView.ScrollIntoView(_messagesListView.Items[_messagesListView.Items.Count - 1]);
+                });
+            }
+        }
         private void SendMessage()
         {
             _server.SendMessageToServer(Message);
@@ -169,4 +186,3 @@ namespace ChatClient.MVVM.ViewModel
         }
     }
 }
-
