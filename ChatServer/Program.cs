@@ -29,7 +29,7 @@ namespace ChatServer
                 foreach(var usr in _users)
                 {
                     var broadcastPacket = new PacketBuilder();
-                    broadcastPacket.WriteOpCode(1);
+                    broadcastPacket.WriteOpCode((byte)OperationCodes.ConnectedToServer);
                     broadcastPacket.WriteMessage(usr.Username);
                     broadcastPacket.WriteMessage(usr.UID.ToString());
                     await user.ClientSocket.Client.SendAsync(broadcastPacket.GetPacketBytes());
@@ -41,7 +41,7 @@ namespace ChatServer
             foreach(var user in _users)
             {
                 var msgPacket = new PacketBuilder();
-                msgPacket.WriteOpCode(5);
+                msgPacket.WriteOpCode((byte)OperationCodes.MsgReceived);
                 msgPacket.WriteMessage(message);
                 await user.ClientSocket.Client.SendAsync(msgPacket.GetPacketBytes());
             }
@@ -52,7 +52,7 @@ namespace ChatServer
             foreach(var user in _users)
             {
                 var audioPacket = new PacketBuilder();
-                audioPacket.WriteOpCode(7);
+                audioPacket.WriteOpCode((byte)OperationCodes.AudioMessageReceived);
                 audioPacket.WriteAudioMessage(audioBytes);
                 await user.ClientSocket.Client.SendAsync(audioPacket.GetPacketBytes());
             }
@@ -64,7 +64,7 @@ namespace ChatServer
             foreach (var user in _users)
             {
                 var broadcastPacket = new PacketBuilder();
-                broadcastPacket.WriteOpCode(10);
+                broadcastPacket.WriteOpCode((byte)OperationCodes.UserDisconnected);
                 broadcastPacket.WriteMessage(uid);
                 await user.ClientSocket.Client.SendAsync(broadcastPacket.GetPacketBytes());
             }

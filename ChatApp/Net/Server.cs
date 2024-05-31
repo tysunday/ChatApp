@@ -34,7 +34,6 @@ namespace ChatClient.Net
                 }
                 ReadPackets();
             }
-
         }
 
         private void ReadPackets()
@@ -43,22 +42,22 @@ namespace ChatClient.Net
             {
                 while (true)
                 {
-                    var opcode = PacketReader.ReadByte();
+                    var opcode = (OperationCodes)PacketReader.ReadByte();
                     switch (opcode)
                     {
-                        case 1:
+                        case OperationCodes.ConnectedToServer:
                             connectedEvent?.Invoke();
                             break;
 
-                        case 5:
+                        case OperationCodes.MsgReceived:
                             msgReceivedEvent?.Invoke();
                             break;
 
-                        case 7:
+                        case OperationCodes.AudioMessageReceived:
                             audioMsgReceivedEvent?.Invoke();
                             break;
 
-                        case 10:
+                        case OperationCodes.UserDisconnected:
                             userDisconnectEvent?.Invoke();
                             break;
 
@@ -72,14 +71,14 @@ namespace ChatClient.Net
         public async Task SendMessageToServer(string message)
         {
             var messagePacket = new PacketBuilder();
-            messagePacket.WriteOpCode(5);
+            messagePacket.WriteOpCode((byte)OperationCodes.MsgReceived);
             messagePacket.WriteMessage(message);
             await _client.Client.SendAsync(messagePacket.GetPacketBytes());
         }
         public async Task SendAudioMessageToServer(byte[] audioBytes)
         {
             var audioPacket = new PacketBuilder();
-            audioPacket.WriteOpCode(7);
+            audioPacket.WriteOpCode((byte)OperationCodes.AudioMessageReceived);
             audioPacket.WriteAudioMessage(audioBytes);
             await _client.Client.SendAsync(audioPacket.GetPacketBytes());
         }

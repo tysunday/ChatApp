@@ -30,15 +30,15 @@ namespace ChatServer
             {
                 try
                 {
-                    var opcode = _packetReader.ReadByte();
+                    var opcode = (OperationCodes)_packetReader.ReadByte();
                     switch (opcode)
                     {
-                        case 5:
+                        case OperationCodes.MsgReceived:
                             var msg = _packetReader.ReadMessage();
                             Console.WriteLine($"[{DateTime.Now}]: Message received! {msg}");
                             await Program.BroadcastMessage($"[{Username}]: {msg}");
                             break;
-                        case 7:
+                        case OperationCodes.AudioMessageReceived:
                             var audioMsg = _packetReader.ReadAudioMessage();
                             Console.WriteLine($"[{DateTime.Now}]: Audio message received!");
                             await Program.BroadcastMessage($"[{Username}]: send audio message.");
