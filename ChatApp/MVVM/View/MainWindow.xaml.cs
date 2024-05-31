@@ -17,8 +17,6 @@ namespace ChatApp
         public MainWindow()
         {
             InitializeComponent();
-            var viewModel = (MainViewModel)DataContext;
-            viewModel.SetMessagesListView(MessagesListView);
         }
     }
 }

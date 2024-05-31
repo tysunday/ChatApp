@@ -10,21 +10,6 @@ using System.Windows.Controls;
 
 namespace ChatClient.MVVM.ViewModel
 {
-
-    public class MessageModel
-    {
-        public string Sender { get; set; }
-        public DateTime Timestamp { get; set; }
-        public string TextMessage { get; set; } // Может быть null для аудиосообщений
-        public string AudioFilename { get; set; } // Может быть null для текстовых сообщений
-    }
-
-    public class AudioMessageModel
-    {
-        public string Filename { get; set; }
-        public string Duration { get; set; }
-    }
-
     class MainViewModel : INotifyPropertyChanged
     {
         private AudioClass AC;
@@ -58,7 +43,6 @@ namespace ChatClient.MVVM.ViewModel
             Messages = new ObservableCollection<MessageModel>();
             Users = new ObservableCollection<UserModel>();
             _server = new Server();
-            Messages.CollectionChanged += Messages_CollectionChanged; // Подписка на событие CollectionChanged
             _server.connectedEvent += UserConnected;
             _server.msgReceivedEvent += MessageReceived;
             _server.userDisconnectEvent += RemoveUser;
@@ -70,28 +54,10 @@ namespace ChatClient.MVVM.ViewModel
             RecordAudioMessageCommand = new RelayCommand(o => RecordAudio());
             PlayAudioCommand = new RelayCommand(o => PlayAudio((MessageModel)o));
         }
-        public void SetMessagesListView(ListView messagesListView)
-        {
-            _messagesListView = messagesListView;
-        }
-        private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            ScrollToBottom();
-        }
-        private void ScrollToBottom()
-        {
-            if (_messagesListView != null && _messagesListView.Items.Count > 0)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    _messagesListView.ScrollIntoView(_messagesListView.Items[_messagesListView.Items.Count - 1]);
-                });
-            }
-        }
+        
         private void SendMessage()
         {
             _server.SendMessageToServer(Message);
-            //Messages.Add(new MessageModel { Sender = Username, Timestamp = DateTime.Now, TextMessage = Message });
             Message = string.Empty;
         }
 
@@ -110,23 +76,8 @@ namespace ChatClient.MVVM.ViewModel
                     var audioBytes = AC.GetRecordedAudioBytes(filePath);
                     await _server.SendAudioMessageToServer(audioBytes);
 
-                    //Messages.Add(new MessageModel
-                    //{
-                    //    Sender = Username,
-                    //    Timestamp = DateTime.Now,
-                    //    AudioFilename = Path.GetFileName(filePath)
-                    //});
-
                     File.Delete(filePath);
                 }
-            }
-        }
-
-        private string GetAudioDuration(string filePath)
-        {
-            using (var reader = new AudioFileReader(filePath))
-            {
-                return reader.TotalTime.ToString(@"hh\:mm\:ss");
             }
         }
 

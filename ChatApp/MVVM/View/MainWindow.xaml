@@ -50,7 +50,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ListView ItemsSource="{Binding Messages}" Grid.Row="0" Name="MessagesListView">
+            <ListView ItemsSource="{Binding Messages}" Grid.Row="0">
                 <ListView.ItemTemplate>
                     <StaticResource ResourceKey="MessageTemplate"/>
                 </ListView.ItemTemplate>
