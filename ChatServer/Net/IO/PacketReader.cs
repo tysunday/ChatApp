@@ -11,26 +11,35 @@ namespace ChatServer.Net.IO
         {
             _ns = ns;
         }
+
         public string ReadMessage()
         {
-            byte[] msgBuffer;
             var length = ReadInt32();
-            msgBuffer = new byte[length];
-            _ns.Read(msgBuffer, 0, length);
-            var msg = Encoding.ASCII.GetString(msgBuffer);
+            var msgBuffer = ReadFully(_ns, length);
+            var msg = Encoding.Unicode.GetString(msgBuffer);
             return msg;
-
         }
+
         public byte[] ReadAudioMessage()
         {
             var length = ReadInt32();
-            var audioBuffer = new byte[length];
-            _ns.Read(audioBuffer, 0, length);
-            return audioBuffer;
+            return ReadFully(_ns, length);
         }
+
+        private byte[] ReadFully(NetworkStream stream, int length)
+        {
+            var buffer = new byte[length];
+            int bytesRead = 0, totalBytesRead = 0;
+            while (totalBytesRead < length && (bytesRead = stream.Read(buffer, totalBytesRead, length - totalBytesRead)) > 0)
+            {
+                totalBytesRead += bytesRead;
+            }
+            return buffer;
+        }
+
         public void SaveAudioMessage(byte[] audioData)
         {
-            string filepath = Guid.NewGuid().ToString();
+            string filepath = Guid.NewGuid().ToString() + ".wav";
             using (var waveFileWriter = new WaveFileWriter(filepath, new WaveFormat()))
             {
                 waveFileWriter.Write(audioData, 0, audioData.Length);

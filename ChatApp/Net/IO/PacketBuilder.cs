@@ -3,25 +3,25 @@ using System.Text;
 
 namespace ChatClient.Net.IO
 {
-    public class PacketBuilder
+    class PacketBuilder
     {
-        private MemoryStream _ms;
-        private BinaryWriter _writer;
-
+        MemoryStream _ms;
         public PacketBuilder()
         {
             _ms = new MemoryStream();
-            _writer = new BinaryWriter(_ms);
         }
+
         public void WriteOpCode(byte opcode)
         {
             _ms.WriteByte(opcode);
         }
+
         public void WriteMessage(string msg)
         {
-            var msgLength = msg.Length;
-            _ms.Write(BitConverter.GetBytes(msgLength));
-            _ms.Write(Encoding.ASCII.GetBytes(msg));
+            var msgBytes = Encoding.Unicode.GetBytes(msg);
+            var msgLength = msgBytes.Length;
+            _ms.Write(BitConverter.GetBytes(msgLength), 0, 4);
+            _ms.Write(msgBytes, 0, msgBytes.Length);
         }
 
         public void WriteAudioMessage(byte[] audioMsg)
