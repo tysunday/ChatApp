@@ -4,6 +4,7 @@ using ChatClient.Net;
 using NAudio.Wave;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,11 +27,30 @@ namespace ChatClient.MVVM.ViewModel
                 OnPropertyChanged(nameof(Message));
             }
         }
+        private string _buttonContent = "Start Record";
+        public string ButtonContent
+        {
+            get => _buttonContent;
+            set
+            {
+                _buttonContent = value;
+                OnPropertyChanged(nameof(ButtonContent));
+            }
+        }
+        private string _buttonColor = "Green";
+        public string ButtonColor
+        {
+            get => _buttonColor;
+            set
+            {
+                _buttonColor = value;
+                OnPropertyChanged(nameof(ButtonColor));
+            }
+        }
 
         public string Username { get; set; }
 
         private Server _server;
-        private ListView _messagesListView;
         public RelayCommand ConnectToServerCommand { get; set; }
         public RelayCommand SendMessageCommand { get; set; }
         public RelayCommand RecordAudioMessageCommand { get; set; }
@@ -47,17 +67,15 @@ namespace ChatClient.MVVM.ViewModel
             _server.msgReceivedEvent += MessageReceived;
             _server.userDisconnectEvent += RemoveUser;
             _server.audioMsgReceivedEvent += AudioMessageReceived;
-            ;
 
             ConnectToServerCommand = new RelayCommand(o => _server.ConnectToServer(Username), o => !string.IsNullOrEmpty(Username));
             SendMessageCommand = new RelayCommand(o => SendMessage(), o => !string.IsNullOrEmpty(Message));
             RecordAudioMessageCommand = new RelayCommand(o => RecordAudio());
             PlayAudioCommand = new RelayCommand(o => PlayAudio((MessageModel)o));
         }
-        
         private void SendMessage()
         {
-            _server.SendMessageToServer(Message);
+            _server?.SendMessageToServer(Message);
             Message = string.Empty;
         }
 
@@ -66,6 +84,8 @@ namespace ChatClient.MVVM.ViewModel
             if (AC.waveSource == null)
             {
                 AC.StartRecordAudio();
+                ButtonContent = "Stop Record";
+                ButtonColor = "Red";
             }
             else
             {
@@ -74,8 +94,9 @@ namespace ChatClient.MVVM.ViewModel
                 if (File.Exists(filePath))
                 {
                     var audioBytes = AC.GetRecordedAudioBytes(filePath);
+                    ButtonContent = "Start Record";
+                    ButtonColor = "Green";
                     await _server.SendAudioMessageToServer(audioBytes);
-
                     File.Delete(filePath);
                 }
             }
